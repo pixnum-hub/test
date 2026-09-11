@@ -1,301 +1,387 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Audio Extractor</title>
+<title>Pixel Clone — exact image duplicator</title>
 <style>
-:root, [data-theme="dark"] { --bg:#0d0f11; --surface:#16191d; --surface-2:#1e2227; --text:#e8ecef; --muted:#8b95a1; --accent:#5eead4; --accent-text:#05201c; --border:#262b31; --danger:#f87171; }
-[data-theme="light"] { --bg:#f4f6f7; --surface:#fff; --surface-2:#eceff1; --text:#14181b; --muted:#5b6570; --accent:#0f9c8a; --accent-text:#fff; --border:#dde2e5; --danger:#c0392b; }
-[data-theme="oled"] { --bg:#000; --surface:#000; --surface-2:#0a0a0a; --text:#f2f2f2; --muted:#8a8a8a; --accent:#5eead4; --accent-text:#000; --border:#1c1c1c; --danger:#ff6b6b; }
-[data-theme="hc"] { --bg:#000; --surface:#000; --surface-2:#000; --text:#fff; --muted:#fff; --accent:#ffd60a; --accent-text:#000; --border:#fff; --danger:#ff4d4d; }
-* { box-sizing: border-box; }
-html, body { min-height: 100%; }
-body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; transition: background .2s ease, color .2s ease; }
-.banner { background: var(--danger); color: #fff; text-align: center; padding: .7rem 1rem; font-size: .82rem; line-height: 1.5; }
-.banner code { background: rgba(0,0,0,.25); padding: .1rem .35rem; border-radius: 4px; font-size: .78rem; }
-.topbar { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
-.brand { font-weight: 600; letter-spacing: -0.01em; }
-.theme-toggle { display: flex; gap: .35rem; }
-.theme-toggle button { width: 2.1rem; height: 2.1rem; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 1rem; cursor: pointer; }
-.theme-toggle button:hover, .theme-toggle button:focus-visible { border-color: var(--accent); }
-.theme-toggle button[aria-pressed="true"] { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
-.wrap { flex: 1; display: flex; align-items: center; justify-content: center; padding: 1.5rem 1rem 2.5rem; }
-.card { width: 100%; max-width: 440px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem 1.5rem; }
-h1 { font-size: 1.35rem; margin: 0 0 .4rem; letter-spacing: -0.01em; }
-.sub { margin: 0 0 1.4rem; color: var(--muted); font-size: .92rem; line-height: 1.45; }
-.tabs { display: flex; gap: .4rem; margin-bottom: 1.2rem; background: var(--surface-2); border-radius: 8px; padding: .25rem; }
-.tabs button { flex: 1; padding: .5rem; border: none; border-radius: 6px; background: transparent; color: var(--muted); font-size: .85rem; font-weight: 600; cursor: pointer; }
-.tabs button[aria-selected="true"] { background: var(--surface); color: var(--text); }
-.url-panel label { display: block; font-size: .85rem; color: var(--muted); margin-bottom: .4rem; }
-.url-panel input[type="url"] { width: 100%; padding: .65rem .75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text); font-size: .9rem; margin-bottom: .5rem; }
-.url-hint { font-size: .78rem; color: var(--muted); margin: 0 0 1rem; line-height: 1.4; }
-.dropzone { border: 1.5px dashed var(--border); border-radius: 10px; padding: 1.6rem 1rem; text-align: center; cursor: pointer; color: var(--muted); }
-.dropzone:hover, .dropzone:focus-visible, .dropzone.drag { border-color: var(--accent); color: var(--text); }
-.dropzone p { margin: .5rem 0 0; font-size: .92rem; }
-.dropzone strong { color: var(--text); }
-.wave { width: 90px; height: 30px; fill: var(--accent); margin: 0 auto; display: block; }
-.file-info { margin-top: 1.4rem; }
-.file-row { display: flex; justify-content: space-between; gap: .75rem; font-size: .88rem; padding: .6rem .75rem; background: var(--surface-2); border-radius: 8px; margin-bottom: 1rem; }
-.file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.file-meta { color: var(--muted); font-variant-numeric: tabular-nums; flex-shrink: 0; }
-.options { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; font-size: .9rem; }
-.options select { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: .4rem .6rem; font-size: .9rem; }
-.primary { width: 100%; padding: .75rem; border: none; border-radius: 8px; background: var(--accent); color: var(--accent-text); font-size: .95rem; font-weight: 600; cursor: pointer; }
-.primary:disabled { opacity: .6; cursor: not-allowed; }
-.progress-wrap { margin-top: 1rem; background: var(--surface-2); border-radius: 6px; overflow: hidden; position: relative; height: 1.6rem; }
-.progress-bar { height: 100%; width: 0%; background: var(--accent); transition: width .2s ease; }
-.progress-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: .8rem; color: var(--text); }
-.download { display: block; text-align: center; margin-top: 1rem; padding: .7rem; border-radius: 8px; border: 1px solid var(--accent); color: var(--accent); text-decoration: none; font-weight: 600; font-size: .9rem; }
-.error { color: var(--danger); font-size: .85rem; margin-top: .9rem; }
-.footer { display: flex; align-items: center; justify-content: center; min-height: 3.5rem; border-top: 1px solid var(--border); padding: .75rem 1rem; }
-.footer p { margin: 0; font-size: .8rem; color: var(--muted); text-align: center; }
-@media (min-width: 600px) { .card { padding: 2.25rem; } h1 { font-size: 1.55rem; } }
+  :root{
+    --radius:3px;
+    --gap:16px;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  html[data-theme="light"]{
+    --bg:#F3F1EC; --surface:#FFFFFF; --surface2:#EDEAE2; --text:#17160F;
+    --muted:#6E6A5E; --border:#D9D4C6; --accent:#B4530A; --accent-text:#FFFFFF;
+    --shadow:0 1px 0 rgba(0,0,0,.04);
+  }
+  html[data-theme="dark"]{
+    --bg:#14161A; --surface:#1C1F24; --surface2:#22262C; --text:#E9E6DE;
+    --muted:#8D897C; --border:#2B2F35; --accent:#FFB000; --accent-text:#14161A;
+    --shadow:0 1px 0 rgba(0,0,0,.3);
+  }
+  html[data-theme="oled"]{
+    --bg:#000000; --surface:#000000; --surface2:#0A0A0A; --text:#EAE7DF;
+    --muted:#847F72; --border:#181818; --accent:#FFB000; --accent-text:#000000;
+    --shadow:none;
+  }
+  html[data-theme="hc"]{
+    --bg:#000000; --surface:#000000; --surface2:#000000; --text:#FFFFFF;
+    --muted:#FFFFFF; --border:#FFFFFF; --accent:#FFEA00; --accent-text:#000000;
+    --shadow:none;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg); color:var(--text); font-family:var(--sans);
+    min-height:100vh; display:flex; flex-direction:column;
+    -webkit-font-smoothing:antialiased; transition:background .15s linear,color .15s linear;
+  }
+  a{color:var(--accent);}
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 20px; border-bottom:1px solid var(--border);
+  }
+  .brand{display:flex; flex-direction:column; line-height:1.15;}
+  .brand b{font-size:17px; letter-spacing:.2px;}
+  .brand span{font-size:12px; color:var(--muted); font-family:var(--mono);}
+  #themeBtn{
+    font-family:var(--mono); font-size:12px; letter-spacing:.4px;
+    background:var(--surface2); color:var(--text); border:1px solid var(--border);
+    border-radius:var(--radius); padding:9px 12px; cursor:pointer; min-width:92px;
+  }
+  html[data-theme="hc"] #themeBtn{border-width:2px;}
+  #themeBtn:focus-visible, button:focus-visible, [tabindex]:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
+  main{
+    flex:1; width:100%; max-width:720px; margin:0 auto;
+    padding:28px 20px 40px; display:flex; flex-direction:column; align-items:center;
+  }
+  .intro{text-align:center; max-width:520px; margin-bottom:22px;}
+  .intro h1{font-size:22px; margin:0 0 8px; font-weight:650;}
+  .intro p{margin:0; color:var(--muted); font-size:14.5px; line-height:1.55;}
+
+  #dropzone{
+    width:100%; border:1px dashed var(--border); border-radius:var(--radius);
+    background:var(--surface); padding:38px 16px; text-align:center; cursor:pointer;
+    transition:border-color .12s linear, background .12s linear; position:relative;
+  }
+  html[data-theme="hc"] #dropzone{border-style:solid; border-width:2px;}
+  #dropzone.drag{border-color:var(--accent); background:var(--surface2);}
+  #dropzone svg{width:34px; height:34px; stroke:var(--muted); margin-bottom:12px;}
+  #dropzone.drag svg{stroke:var(--accent);}
+  #dropzone strong{display:block; font-size:15px; margin-bottom:4px;}
+  #dropzone small{display:block; color:var(--muted); font-size:12.5px; font-family:var(--mono);}
+  #fileInput{position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;}
+
+  #status{margin-top:14px; font-family:var(--mono); font-size:12.5px; color:var(--muted); min-height:16px; text-align:center;}
+  #status.err{color:#E5484D;}
+
+  #results{width:100%; display:none; margin-top:26px;}
+  #results.show{display:block;}
+
+  .panels{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .panel{border:1px solid var(--border); border-radius:var(--radius); background:var(--surface); overflow:hidden;}
+  html[data-theme="hc"] .panel{border-width:2px;}
+  .panel h2{
+    margin:0; font-size:11px; letter-spacing:.5px; font-family:var(--mono);
+    padding:8px 10px; border-bottom:1px solid var(--border); color:var(--muted);
+  }
+  .frame{
+    aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;
+    background:
+      linear-gradient(45deg,var(--surface2) 25%,transparent 25%,transparent 75%,var(--surface2) 75%),
+      linear-gradient(45deg,var(--surface2) 25%,transparent 25%,transparent 75%,var(--surface2) 75%);
+    background-size:16px 16px; background-position:0 0,8px 8px; overflow:hidden; position:relative;
+  }
+  .frame img{max-width:100%; max-height:100%; object-fit:contain; display:block;}
+  .scanbar{
+    position:absolute; left:0; right:0; height:22%; top:-25%;
+    background:linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent) 55%, transparent), transparent);
+    animation:sweep 1.1s ease-in-out 1;
+  }
+  @keyframes sweep{ from{top:-25%;} to{top:105%;} }
+  @media (prefers-reduced-motion:reduce){ .scanbar{animation:none; display:none;} }
+
+  table#meta{width:100%; border-collapse:collapse; margin-top:14px; font-size:13px;}
+  table#meta td{padding:8px 4px; border-bottom:1px solid var(--border); vertical-align:middle;}
+  table#meta td:first-child{color:var(--muted); width:44%;}
+  table#meta td:last-child{font-family:var(--mono); text-align:right; word-break:break-all;}
+
+  .actions{display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;}
+  .btn{
+    flex:1; min-width:140px; text-align:center; border-radius:var(--radius); padding:12px 14px;
+    font-size:14px; font-weight:600; border:1px solid var(--border); cursor:pointer;
+    background:var(--surface2); color:var(--text); font-family:var(--sans); text-decoration:none;
+  }
+  .btn.primary{background:var(--accent); color:var(--accent-text); border-color:var(--accent);}
+  html[data-theme="hc"] .btn{border-width:2px;}
+  .btn[disabled]{opacity:.45; pointer-events:none;}
+  #saveHint{margin:12px 0 0; font-size:12px; color:var(--muted); text-align:center; line-height:1.5;}
+
+  footer{
+    border-top:1px solid var(--border); padding:16px 20px;
+    display:flex; align-items:center; justify-content:center; min-height:52px;
+  }
+  footer p{
+    margin:0; text-align:center; font-size:12px; color:var(--muted);
+    font-family:var(--mono); line-height:1.5; display:flex; align-items:center;
+  }
+
+  @media (max-width:520px){
+    .panels{grid-template-columns:1fr;}
+    .intro h1{font-size:19px;}
+    header{padding:14px 16px;}
+  }
 </style>
 </head>
 <body>
-<div id="protocolWarning" class="banner" role="alert" hidden>
-  <strong>This page needs the server running.</strong>
-  You opened the file directly — extraction won't work this way.
-  Run <code>deno run --allow-net --allow-read --allow-write --allow-run server.ts</code>
-  in this folder, then open <code>http://localhost:8000</code> instead.
-</div>
-<header class="topbar">
-  <span class="brand">Audio Extractor</span>
-  <div class="theme-toggle" role="group" aria-label="Theme">
-    <button data-theme="light" aria-label="Light theme">☀</button>
-    <button data-theme="dark" aria-label="Dark theme">☾</button>
-    <button data-theme="oled" aria-label="OLED true black theme">●</button>
-    <button data-theme="hc" aria-label="High contrast theme">◐</button>
+
+<header>
+  <div class="brand">
+    <b>Pixel Clone</b>
+    <span>exact raster duplicator</span>
   </div>
+  <button id="themeBtn" type="button" aria-label="Cycle theme">Dark</button>
 </header>
-<main class="wrap">
-  <section class="card">
-    <h1>Extract audio from your file</h1>
-    <p class="sub">Drop a video or audio file, or fetch one from a direct file link. Nothing leaves your session except the source you choose.</p>
-    <div class="tabs" role="tablist">
-      <button id="tabUpload" role="tab" aria-selected="true">Upload file</button>
-      <button id="tabUrl" role="tab" aria-selected="false">From URL</button>
-    </div>
-    <div id="uploadPanel">
-      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Choose or drop a file">
-        <svg class="wave" viewBox="0 0 120 40" aria-hidden="true">
-          <rect x="2" y="14" width="4" height="12"></rect>
-          <rect x="10" y="6" width="4" height="28"></rect>
-          <rect x="18" y="18" width="4" height="4"></rect>
-          <rect x="26" y="2" width="4" height="36"></rect>
-          <rect x="34" y="10" width="4" height="20"></rect>
-          <rect x="42" y="16" width="4" height="8"></rect>
-          <rect x="50" y="4" width="4" height="32"></rect>
-          <rect x="58" y="12" width="4" height="16"></rect>
-          <rect x="66" y="0" width="4" height="40"></rect>
-          <rect x="74" y="14" width="4" height="12"></rect>
-          <rect x="82" y="8" width="4" height="24"></rect>
-          <rect x="90" y="17" width="4" height="6"></rect>
-          <rect x="98" y="5" width="4" height="30"></rect>
-          <rect x="106" y="15" width="4" height="10"></rect>
-          <rect x="114" y="18" width="4" height="4"></rect>
-        </svg>
-        <p><strong>Choose a file</strong> or drag it here</p>
-        <input id="fileInput" type="file" accept="video/*,audio/*" hidden>
+
+<main>
+  <div class="intro">
+    <h1>Clone an image, pixel for pixel</h1>
+    <p>Drop a photo in. It's decoded straight into memory, redrawn on a canvas, and re‑encoded losslessly — the output carries the exact same pixel values as the source. Nothing leaves your device.</p>
+  </div>
+
+  <div id="dropzone" tabindex="0" role="button" aria-label="Choose an image to clone">
+    <input type="file" id="fileInput" accept="image/*" aria-label="Choose image file">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 15V3M12 3l-4 4M12 3l4 4"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+    </svg>
+    <strong>Tap to choose, or drag an image here</strong>
+    <small>PNG · JPEG · WEBP · GIF · BMP — processed locally</small>
+  </div>
+
+  <div id="status"></div>
+
+  <section id="results">
+    <div class="panels">
+      <div class="panel">
+        <h2>SOURCE</h2>
+        <div class="frame"><img id="srcImg" alt="Original image"></div>
+      </div>
+      <div class="panel">
+        <h2>CLONE</h2>
+        <div class="frame" id="cloneFrame"><img id="cloneImg" alt="Cloned image"></div>
       </div>
     </div>
-    <div id="urlPanel" class="url-panel" hidden>
-      <label for="urlInput">Direct file link</label>
-      <input id="urlInput" type="url" placeholder="https://your-storage.example.com/video.mp4">
-      <p class="url-hint">Direct file links only (your own storage, CDN, or cloud drive). Streaming or social platforms — YouTube, TikTok, Instagram, etc. — aren't supported here.</p>
-      <button id="fetchUrlBtn" class="primary">Fetch file</button>
+
+    <table id="meta">
+      <tr><td>Dimensions</td><td id="mDim">—</td></tr>
+      <tr><td>Source format</td><td id="mFmt">—</td></tr>
+      <tr><td>Source size</td><td id="mSrcSize">—</td></tr>
+      <tr><td>Clone size (lossless PNG)</td><td id="mCloneSize">—</td></tr>
+      <tr><td>Pixel match</td><td id="mMatch">—</td></tr>
+    </table>
+
+    <div class="actions">
+      <a class="btn primary" id="downloadBtn" download rel="noopener">Download clone (.png)</a>
+      <a class="btn" id="openBtn" target="_blank" rel="noopener">Open full-size</a>
+      <button class="btn" id="resetBtn" type="button">Clone another</button>
     </div>
-    <div id="fileInfo" class="file-info" hidden>
-      <div class="file-row">
-        <span id="fileName" class="file-name"></span>
-        <span id="fileMeta" class="file-meta"></span>
-      </div>
-      <div class="options">
-        <label for="format">Output format</label>
-        <select id="format">
-          <option value="mp3">MP3</option>
-          <option value="wav">WAV</option>
-          <option value="m4a">M4A</option>
-          <option value="flac">FLAC</option>
-        </select>
-      </div>
-      <button id="extractBtn" class="primary">Extract audio</button>
-      <div id="progressWrap" class="progress-wrap" hidden>
-        <div id="progressBar" class="progress-bar"></div>
-        <span id="progressLabel" class="progress-label">Processing…</span>
-      </div>
-      <a id="downloadLink" class="download" hidden download>Download audio</a>
-      <p id="errorMsg" class="error" hidden></p>
-    </div>
+    <p id="saveHint">If the download doesn't start on its own, long‑press (mobile) or right‑click (desktop) the CLONE image above and choose "Save image".</p>
   </section>
 </main>
-<footer class="footer">
-  <p>© <span id="year"></span> Manik Roy. All Rights Reserved.</p>
+
+<footer>
+  <p>© <span id="yr"></span> Manik Roy. All Rights Reserved.</p>
 </footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/upng-js/2.1.0/UPNG.min.js"></script>
 <script>
-// ---- Footer year ----
-document.getElementById("year").textContent = new Date().getFullYear();
-// ---- Warn if opened directly instead of via the Deno server ----
-const isFileProtocol = location.protocol === "file:";
-if (isFileProtocol) {
-  document.getElementById("protocolWarning").hidden = false;
-}
-// ---- Theme handling ----
-const themeButtons = document.querySelectorAll(".theme-toggle button");
-const root = document.documentElement;
-function applyTheme(name) {
-  root.setAttribute("data-theme", name);
-  themeButtons.forEach((b) =>
-    b.setAttribute("aria-pressed", String(b.dataset.theme === name))
-  );
-  localStorage.setItem("audio-extractor-theme", name);
-}
-const savedTheme =
-  localStorage.getItem("audio-extractor-theme") ||
-  (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
-applyTheme(savedTheme);
-themeButtons.forEach((btn) =>
-  btn.addEventListener("click", () => applyTheme(btn.dataset.theme))
-);
-// ---- Tab switching ----
-const tabUpload = document.getElementById("tabUpload");
-const tabUrl = document.getElementById("tabUrl");
-const uploadPanel = document.getElementById("uploadPanel");
-const urlPanel = document.getElementById("urlPanel");
-const urlInput = document.getElementById("urlInput");
-const fetchUrlBtn = document.getElementById("fetchUrlBtn");
-function setMode(mode) {
-  const isUpload = mode === "upload";
-  tabUpload.setAttribute("aria-selected", String(isUpload));
-  tabUrl.setAttribute("aria-selected", String(!isUpload));
-  uploadPanel.hidden = !isUpload;
-  urlPanel.hidden = isUpload;
-}
-tabUpload.addEventListener("click", () => setMode("upload"));
-tabUrl.addEventListener("click", () => setMode("url"));
-// ---- File selection ----
-const dropzone = document.getElementById("dropzone");
-const fileInput = document.getElementById("fileInput");
-const fileInfo = document.getElementById("fileInfo");
-const fileNameEl = document.getElementById("fileName");
-const fileMetaEl = document.getElementById("fileMeta");
-const extractBtn = document.getElementById("extractBtn");
-const formatSelect = document.getElementById("format");
-const progressWrap = document.getElementById("progressWrap");
-const progressBar = document.getElementById("progressBar");
-const progressLabel = document.getElementById("progressLabel");
-const downloadLink = document.getElementById("downloadLink");
-const errorMsg = document.getElementById("errorMsg");
-let selectedFile = null;
-let sourceUrl = null;
-function formatBytes(bytes) {
-  if (bytes < 1024) return bytes + " B";
-  const units = ["KB", "MB", "GB"];
-  let i = -1;
-  do {
-    bytes /= 1024;
-    i++;
-  } while (bytes >= 1024 && i < units.length - 1);
-  return bytes.toFixed(1) + " " + units[i];
-}
-function selectFile(file) {
-  if (!file) return;
-  selectedFile = file;
-  sourceUrl = null;
-  fileNameEl.textContent = file.name;
-  fileMetaEl.textContent = formatBytes(file.size);
-  fileInfo.hidden = false;
-  downloadLink.hidden = true;
-  errorMsg.hidden = true;
-  progressWrap.hidden = true;
-}
-dropzone.addEventListener("click", () => fileInput.click());
-dropzone.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" || e.key === " ") fileInput.click();
-});
-fileInput.addEventListener("change", () => selectFile(fileInput.files[0]));
-["dragover", "dragenter"].forEach((evt) =>
-  dropzone.addEventListener(evt, (e) => {
-    e.preventDefault();
-    dropzone.classList.add("drag");
-  })
-);
-["dragleave", "drop"].forEach((evt) =>
-  dropzone.addEventListener(evt, (e) => {
-    e.preventDefault();
-    dropzone.classList.remove("drag");
-  })
-);
-dropzone.addEventListener("drop", (e) => selectFile(e.dataTransfer.files[0]));
-fetchUrlBtn.addEventListener("click", () => {
-  const url = urlInput.value.trim();
-  if (!url) return;
-  selectedFile = null;
-  sourceUrl = url;
-  fileNameEl.textContent = url;
-  fileMetaEl.textContent = "URL";
-  fileInfo.hidden = false;
-  downloadLink.hidden = true;
-  errorMsg.hidden = true;
-  progressWrap.hidden = true;
-});
-// ---- Extraction request ----
-extractBtn.addEventListener("click", () => {
-  if (!selectedFile && !sourceUrl) return;
-  if (isFileProtocol) {
-    errorMsg.textContent =
-      "Server not running. See the notice at the top of the page.";
-    errorMsg.hidden = false;
-    return;
+(function(){
+  "use strict";
+
+  /* ---------- footer year ---------- */
+  var START_YEAR = 2026;
+  var now = new Date().getFullYear();
+  document.getElementById("yr").textContent = now > START_YEAR ? (START_YEAR + "–" + now) : String(START_YEAR);
+
+  /* ---------- theme cycle (in-memory only, no storage) ---------- */
+  var THEMES = ["dark","oled","hc","light"];
+  var LABELS = {dark:"Dark", oled:"OLED", hc:"High contrast", light:"Light"};
+  var html = document.documentElement;
+  var themeBtn = document.getElementById("themeBtn");
+
+  function applyTheme(t){
+    html.setAttribute("data-theme", t);
+    themeBtn.textContent = LABELS[t];
+    themeBtn.setAttribute("aria-label", "Current theme " + LABELS[t] + ". Tap to switch.");
   }
-  errorMsg.hidden = true;
-  downloadLink.hidden = true;
-  progressWrap.hidden = false;
-  progressBar.style.width = "0%";
-  progressLabel.textContent = sourceUrl ? "Fetching…" : "Uploading…";
-  extractBtn.disabled = true;
-  const formData = new FormData();
-  if (selectedFile) formData.append("file", selectedFile);
-  if (sourceUrl) formData.append("url", sourceUrl);
-  formData.append("format", formatSelect.value);
-  const xhr = new XMLHttpRequest();
-  xhr.open("POST", "/extract");
-  xhr.responseType = "blob";
-  xhr.upload.onprogress = (e) => {
-    if (!e.lengthComputable || sourceUrl) return;
-    const pct = Math.min(100, Math.round((e.loaded / e.total) * 100));
-    progressBar.style.width = pct + "%";
-    progressLabel.textContent =
-      pct < 100 ? `Uploading… ${pct}%` : "Extracting audio…";
-  };
-  xhr.onload = () => {
-    extractBtn.disabled = false;
-    if (xhr.status !== 200) {
-      progressWrap.hidden = true;
-      xhr.response.text().then((msg) => {
-        errorMsg.textContent = msg || "Extraction failed.";
-        errorMsg.hidden = false;
-      });
+  applyTheme("dark");
+  themeBtn.addEventListener("click", function(){
+    var i = THEMES.indexOf(html.getAttribute("data-theme"));
+    applyTheme(THEMES[(i + 1) % THEMES.length]);
+  });
+
+  /* ---------- elements ---------- */
+  var dropzone   = document.getElementById("dropzone");
+  var fileInput  = document.getElementById("fileInput");
+  var statusEl   = document.getElementById("status");
+  var results    = document.getElementById("results");
+  var srcImg     = document.getElementById("srcImg");
+  var cloneImg   = document.getElementById("cloneImg");
+  var cloneFrame = document.getElementById("cloneFrame");
+  var downloadBtn= document.getElementById("downloadBtn");
+  var openBtn    = document.getElementById("openBtn");
+  var resetBtn   = document.getElementById("resetBtn");
+  var mDim = document.getElementById("mDim");
+  var mFmt = document.getElementById("mFmt");
+  var mSrcSize = document.getElementById("mSrcSize");
+  var mCloneSize = document.getElementById("mCloneSize");
+  var mMatch = document.getElementById("mMatch");
+
+  var srcURL = null, cloneURL = null;
+
+  function bytes(n){
+    if(n < 1024) return n + " B";
+    if(n < 1024*1024) return (n/1024).toFixed(1) + " KB";
+    return (n/(1024*1024)).toFixed(2) + " MB";
+  }
+
+  function setStatus(msg, isErr){
+    statusEl.textContent = msg || "";
+    statusEl.className = isErr ? "err" : "";
+  }
+
+  function reset(){
+    results.classList.remove("show");
+    setStatus("");
+    fileInput.value = "";
+    if(srcURL) URL.revokeObjectURL(srcURL);
+    if(cloneURL) URL.revokeObjectURL(cloneURL);
+    srcURL = cloneURL = null;
+  }
+
+  /* ---------- core clone pipeline ---------- */
+  /* File/Blob -> ImageBitmap -> OffscreenCanvas -> ImageData -> UPNG (lossless) -> Blob */
+  async function cloneFile(file){
+    if(!file || file.type.indexOf("image/") !== 0){
+      setStatus("That file isn't an image. Choose a PNG, JPEG, WEBP, GIF or BMP.", true);
       return;
     }
-    progressBar.style.width = "100%";
-    progressLabel.textContent = "Done";
-    const blob = xhr.response;
-    const url = URL.createObjectURL(blob);
-    const base = (selectedFile ? selectedFile.name : "audio").replace(/\.[^/.]+$/, "");
-    downloadLink.href = url;
-    downloadLink.download = `${base}.${formatSelect.value}`;
-    downloadLink.hidden = false;
-  };
-  xhr.onerror = () => {
-    extractBtn.disabled = false;
-    progressWrap.hidden = true;
-    errorMsg.textContent = "Network error. Is the server running?";
-    errorMsg.hidden = false;
-  };
-  xhr.send(formData);
-});
+    setStatus("Reading file…");
+
+    try{
+      var blob = file instanceof Blob ? file : new Blob([file]);
+      var bitmap = await createImageBitmap(blob);
+
+      var w = bitmap.width, h = bitmap.height;
+      var canvas = ("OffscreenCanvas" in window) ? new OffscreenCanvas(w, h) : document.createElement("canvas");
+      if(!(canvas instanceof OffscreenCanvas)){ canvas.width = w; canvas.height = h; }
+
+      var ctx = canvas.getContext("2d", { willReadFrequently:true });
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0,0,w,h);
+      ctx.drawImage(bitmap, 0, 0);
+      bitmap.close();
+
+      setStatus("Re‑encoding pixels losslessly…");
+      var imageData = ctx.getImageData(0,0,w,h);
+      var cloneBlob;
+
+      if(typeof UPNG !== "undefined" && typeof pako !== "undefined"){
+        // UPNG.encode with cnum=0 -> full 32-bit truecolor+alpha, no quantization: exact pixel clone
+        var pngBuffer = UPNG.encode([imageData.data.buffer], w, h, 0);
+        cloneBlob = new Blob([pngBuffer], { type: "image/png" });
+      }else{
+        // Fallback if the CDN libraries didn't load: native lossless PNG encode
+        setStatus("Encoder library unavailable — using the browser's built‑in lossless PNG encoder…");
+        cloneBlob = await new Promise(function(resolve){ canvas.convertToBlob ? canvas.convertToBlob({type:"image/png"}).then(resolve) : canvas.toBlob(resolve, "image/png"); });
+      }
+
+      // verify pixel-for-pixel equality by round-tripping the clone back through the decoder
+      var verifyBitmap = await createImageBitmap(cloneBlob);
+      var vCanvas = ("OffscreenCanvas" in window) ? new OffscreenCanvas(w,h) : document.createElement("canvas");
+      if(!(vCanvas instanceof OffscreenCanvas)){ vCanvas.width=w; vCanvas.height=h; }
+      var vCtx = vCanvas.getContext("2d", { willReadFrequently:true });
+      vCtx.drawImage(verifyBitmap, 0, 0);
+      verifyBitmap.close();
+      var verifyData = vCtx.getImageData(0,0,w,h);
+      var identical = arraysEqual(imageData.data, verifyData.data);
+
+      renderResult(file, blob, w, h, cloneBlob, identical);
+    }catch(err){
+      console.error(err);
+      setStatus("Couldn't clone that image: " + (err && err.message ? err.message : "unknown error"), true);
+    }
+  }
+
+  function arraysEqual(a, b){
+    if(a.length !== b.length) return false;
+    for(var i=0;i<a.length;i++){ if(a[i] !== b[i]) return false; }
+    return true;
+  }
+
+  function renderResult(file, srcBlob, w, h, cloneBlob, identical){
+    if(srcURL) URL.revokeObjectURL(srcURL);
+    if(cloneURL) URL.revokeObjectURL(cloneURL);
+
+    srcURL = URL.createObjectURL(srcBlob);
+    cloneURL = URL.createObjectURL(cloneBlob);
+
+    srcImg.src = srcURL;
+    cloneImg.src = cloneURL;
+
+    mDim.textContent = w + " × " + h + " px";
+    mFmt.textContent = file.type || "unknown";
+    mSrcSize.textContent = bytes(file.size);
+    mCloneSize.textContent = bytes(cloneBlob.size) + " PNG";
+    mMatch.textContent = identical ? "100% — every pixel identical" : "Mismatch detected";
+
+    var baseName = (file.name || "image").replace(/\.[^.]+$/, "").replace(/[^a-z0-9_\-]+/gi, "_") || "image";
+    downloadBtn.href = cloneURL;
+    downloadBtn.download = "clone-" + baseName + ".png";
+    openBtn.href = cloneURL;
+
+    // one deliberate reveal moment
+    var bar = document.createElement("div");
+    bar.className = "scanbar";
+    cloneFrame.appendChild(bar);
+    bar.addEventListener("animationend", function(){ bar.remove(); });
+
+    results.classList.add("show");
+    setStatus("Done. Cloned image is ready to download.");
+    results.scrollIntoView({ behavior:"smooth", block:"start" });
+  }
+
+  /* ---------- input wiring ---------- */
+  fileInput.addEventListener("change", function(e){
+    if(e.target.files && e.target.files[0]) cloneFile(e.target.files[0]);
+  });
+
+  dropzone.addEventListener("keydown", function(e){
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); fileInput.click(); }
+  });
+
+  ["dragenter","dragover"].forEach(function(ev){
+    dropzone.addEventListener(ev, function(e){
+      e.preventDefault(); e.stopPropagation(); dropzone.classList.add("drag");
+    });
+  });
+  ["dragleave","drop"].forEach(function(ev){
+    dropzone.addEventListener(ev, function(e){
+      e.preventDefault(); e.stopPropagation(); dropzone.classList.remove("drag");
+    });
+  });
+  dropzone.addEventListener("drop", function(e){
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if(f) cloneFile(f);
+  });
+
+  resetBtn.addEventListener("click", reset);
+})();
 </script>
 </body>
 </html>
